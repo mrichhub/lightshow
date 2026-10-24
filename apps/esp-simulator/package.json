@@ -1,15 +1,15 @@
 {
-  "name": "@lightshow/esp-simulator",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "tsc --noEmit -p ../../tsconfig.json"
-  },
-  "dependencies": {
-    "@lightshow/models": "workspace:*",
-    "@lightshow/messaging": "workspace:*",
-    "@lightshow/ddp": "workspace:*",
-    "@lightshow/effects": "workspace:*"
-  }
+	"name": "@lightshow/esp-simulator",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "tsc --noEmit -p ../../tsconfig.json"
+	},
+	"dependencies": {
+		"@lightshow/models": "workspace:*",
+		"@lightshow/messaging": "workspace:*",
+		"@lightshow/ddp": "workspace:*",
+		"@lightshow/effects": "workspace:*"
+	}
 }

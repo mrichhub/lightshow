@@ -1,13 +1,13 @@
 {
-  "name": "@lightshow/models",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./security": "./src/security.ts"
-  },
-  "dependencies": {
-    "@sinclair/typebox": "0.34.41"
-  }
+	"name": "@lightshow/models",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./security": "./src/security.ts"
+	},
+	"dependencies": {
+		"@sinclair/typebox": "0.34.41"
+	}
 }

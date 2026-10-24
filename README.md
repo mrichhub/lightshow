@@ -73,6 +73,8 @@ This builds with public example settings. To run hardware, generate the ignored 
 
 ## Development and verification
 
+Use tabs, double quotes and no optional JavaScript/TypeScript semicolons. Leave blank lines between declarations, methods and logical statement groups. `pnpm format` applies the shared Prettier settings and preserves these blank lines; `.editorconfig` supplies editor defaults. Firmware and native C++ tests follow `.clang-format` (clang-format 20). YAML and Markdown use spaces where their syntax requires them.
+
 ```sh
 pnpm typecheck
 pnpm test

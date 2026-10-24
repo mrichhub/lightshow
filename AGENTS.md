@@ -2,6 +2,8 @@
 
 Read README.md and docs/architecture.md before changing service boundaries.
 
+- Use tabs for indentation, double-quoted strings and no optional JavaScript/TypeScript semicolons. Follow `.prettierrc.json`, `.editorconfig` and `.clang-format`; retain punctuation and space indentation required by other languages, including C++, CSS and YAML.
+- Leave blank lines between top-level declarations, class methods and logical statement groups. Separate validation, setup, control flow and return statements. Prefer one variable declaration per statement instead of comma-separated declarations. Preserve this spacing when editing; Prettier retains intentional blank lines.
 - MongoDB is authoritative for persistent configuration. The API owns configuration writes and validation.
 - The Show Engine alone owns the show timeline, frame composition, overrides, logical mappings and DDP transmission.
 - ESP firmware owns physical LED output and local fallback; it never knows about elements or skipped pixels.

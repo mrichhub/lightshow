@@ -12,14 +12,14 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    entrypoint: ['bash', '/bootstrap/start.sh']
+    entrypoint: ["bash", "/bootstrap/start.sh"]
     volumes:
       - mongo-data:/data/db
       - ./.secrets/mongo-key:/bootstrap/mongo-key:ro
       - ./infra/mongo/start.sh:/bootstrap/start.sh:ro
     networks: [lightshow]
     healthcheck:
-      test: [CMD, mongosh, --quiet, --eval, 'quit(db.runCommand({ping:1}).ok ? 0 : 1)']
+      test: [CMD, mongosh, --quiet, --eval, "quit(db.runCommand({ping:1}).ok ? 0 : 1)"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -31,15 +31,15 @@ services:
       MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_API_PASSWORD: ${MONGO_API_PASSWORD}
       MONGO_ENGINE_PASSWORD: ${MONGO_ENGINE_PASSWORD}
-    entrypoint: ['bash', '/bootstrap/init.sh']
-    volumes: ['./infra/mongo/init.sh:/bootstrap/init.sh:ro']
+    entrypoint: ["bash", "/bootstrap/init.sh"]
+    volumes: ["./infra/mongo/init.sh:/bootstrap/init.sh:ro"]
     networks: [lightshow]
     depends_on:
       mongo: { condition: service_healthy }
   mosquitto:
     image: eclipse-mosquitto:2.1.2-alpine
     restart: unless-stopped
-    ports: ['8883:8883']
+    ports: ["8883:8883"]
     volumes:
       - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./.secrets/mqtt/server.crt:/mosquitto/certs/server.crt:ro
@@ -47,7 +47,7 @@ services:
       - ./.secrets/broker:/mosquitto/data
     networks: [lightshow]
     healthcheck:
-      test: [CMD-SHELL, 'nc -z 127.0.0.1 8883']
+      test: [CMD-SHELL, "nc -z 127.0.0.1 8883"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -117,19 +117,19 @@ services:
       LIGHTSHOW_HOST: ${LIGHTSHOW_HOST:-lightshow.home.arpa}
       CADDY_TLS: ${CADDY_TLS:-internal}
       API_UPSTREAM: ${API_HOST:-api}:${API_PORT:-3000}
-    ports: ['${HTTPS_PORT:-443}:443', '${HTTP_PORT:-80}:80']
+    ports: ["${HTTPS_PORT:-443}:443", "${HTTP_PORT:-80}:80"]
     volumes:
       - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
     networks:
       lightshow:
-        aliases: ['${LIGHTSHOW_HOST:-lightshow.home.arpa}']
+        aliases: ["${LIGHTSHOW_HOST:-lightshow.home.arpa}"]
     depends_on:
       api: { condition: service_healthy }
       ui: { condition: service_healthy }
     healthcheck:
-      test: [CMD-SHELL, 'wget -q -O /dev/null http://127.0.0.1:2019/config/']
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1:2019/config/"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -149,7 +149,7 @@ services:
     volumes:
       - ./.secrets/trust:/run/trust:ro
       - simulator-state:/state
-    ports: ['127.0.0.1:${SIM_INSPECT_PORT:-4090}:4090']
+    ports: ["127.0.0.1:${SIM_INSPECT_PORT:-4090}:4090"]
     depends_on:
       caddy: { condition: service_healthy }
 networks:

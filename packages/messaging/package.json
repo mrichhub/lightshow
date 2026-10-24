@@ -1,12 +1,12 @@
 {
-  "name": "@lightshow/messaging",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "mqtt": "5.14.1"
-  }
+	"name": "@lightshow/messaging",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"mqtt": "5.14.1"
+	}
 }
