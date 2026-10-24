@@ -1,0 +1,24 @@
+name: validate
+on: [push, pull_request]
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm install -g pnpm@10.20.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check && pnpm typecheck && pnpm test && pnpm test:firmware && pnpm build
+      - run: pnpm setup && docker compose up -d --build --wait && pnpm trust
+      - run: bash scripts/integration.sh
+      - if: always()
+        run: docker compose logs --tail 100 && docker compose down
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install platformio==6.2.0
+      - run: pio run -d firmware/esp32 -e wt32-eth01 -e esp32dev

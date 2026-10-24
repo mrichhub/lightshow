@@ -1,0 +1,15 @@
+# Validation
+
+Recorded on 2026-10-24: Node 24.22.1 container build and TypeScript checks passed; all 10 unit tests and the full integration suite passed against MongoDB 8.0.34, Mosquitto 2.1.2 and Caddy 2.11.7. The native C++ parser test and both PlatformIO targets passed, including builds with the actual deployment public CA bundle. Desktop/mobile Chrome checks passed. The JavaScript dependency audit reported zero known vulnerabilities at validation time.
+
+Automated checks are deliberately separated from physical hardware acceptance.
+
+`pnpm test` covers six-character ID generation and collision retries, token entropy/hashing, board pin restrictions, duplicate pins, cross-device mappings, skipped logical indexes, overlap rejection, freshness/health classification, DDP headers/offsets/sequence rollover, multi-packet completion, dropped/incomplete recovery, allowlists, source lock, five-second timeout, local exemption, all six effects and scene/debugger composition.
+
+`pnpm test:firmware` compiles and runs the actual portable firmware DDP parser with a host C++ compiler, covering malformed lengths, source filtering/lock, ordered completion, wrap and timeout. `pio run -d firmware/esp32 -e wt32-eth01 -e esp32dev` compiles both complete embedded applications and reports RAM/flash size.
+
+`bash scripts/integration.sh` exercises the real Compose deployment through Caddy HTTPS using the exported CA. It verifies login/cookie flags, Origin rejection, administrative token scopes, hardware-bound enrollment, single-use claims, stored hashes, simulator identity, real TLS MQTT connection and topic denial, persisted heartbeats, initial/incremental SSE, GPIO/version rejection, configuration propagation, scene activation, rendered DDP pixels, skipped pixels under element/output overrides, mode changes, actual five-second blackout and credential/session revocation. It creates temporary resources and stops the current show; run it on a development deployment.
+
+`pnpm test:browser` uses the installed Chrome channel against the local HTTPS deployment. It checks administrator login, a live dashboard, navigation and responsive layout. Configure LAN DNS/hosts and export trust first. The browser test pins the certificate's SPKI for the local test run through the runner script; it does not disable TLS validation globally.
+
+Physical acceptance still requires both boards, real WS2811 strings and a LAN. Validate 40 FPS at the intended string lengths, concurrent outputs, Ethernet/Wi-Fi recovery, trusted TLS date/hostname validation, startup LED states, blackout timing, network/API outages and cache recovery. Build success alone does not establish these electrical and timing properties.
