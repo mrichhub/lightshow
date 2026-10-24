@@ -5,5 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit -p ../../tsconfig.json"
+  },
+  "dependencies": {
+    "@lightshow/models": "workspace:*",
+    "@lightshow/messaging": "workspace:*"
   }
 }

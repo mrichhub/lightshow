@@ -19,3 +19,4 @@ coverage/
 firmware/esp32/include/secrets.h
 playwright-report/
 test-results/
+!*.local.example.ini
