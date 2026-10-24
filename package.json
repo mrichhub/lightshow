@@ -1,0 +1,39 @@
+{
+  "name": "lightshow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "tsc --noEmit && pnpm --filter @lightshow/ui typecheck",
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx --test tests/integration/*.test.ts",
+    "setup": "node scripts/setup.mjs",
+    "trust": "node scripts/export-trust.mjs",
+    "dev:api": "tsx watch apps/api/src/main.ts",
+    "dev:engine": "tsx watch apps/show-engine/src/main.ts",
+    "dev:ui": "pnpm --filter @lightshow/ui dev",
+    "simulator": "tsx apps/esp-simulator/src/main.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.0.2",
+    "@fastify/rate-limit": "10.3.0",
+    "@fastify/swagger": "9.5.2",
+    "@fastify/swagger-ui": "5.2.3",
+    "@sinclair/typebox": "0.34.41",
+    "argon2": "0.44.0",
+    "dotenv": "17.2.3",
+    "fastify": "5.6.2",
+    "mongodb": "6.20.0",
+    "mqtt": "5.14.1",
+    "undici": "7.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "pnpm": { "onlyBuiltDependencies": ["argon2", "esbuild"] }
+}

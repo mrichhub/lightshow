@@ -1,0 +1,115 @@
+name: lightshow
+x-app: &app
+  build: { context: ., target: base }
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - ./.secrets/trust:/run/trust:ro
+  networks: [lightshow]
+services:
+  mongo:
+    image: mongo:8.0.16
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    entrypoint: ["bash", "/bootstrap/start.sh"]
+    volumes:
+      - mongo-data:/data/db
+      - ./.secrets/mongo-key:/bootstrap/mongo-key:ro
+      - ./infra/mongo/start.sh:/bootstrap/start.sh:ro
+    networks: [lightshow]
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, "quit(db.runCommand({ping:1}).ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  mongo-init:
+    image: mongo:8.0.16
+    restart: on-failure
+    env_file: .env
+    entrypoint: ["bash", "/bootstrap/init.sh"]
+    volumes: ["./infra/mongo/init.sh:/bootstrap/init.sh:ro"]
+    networks: [lightshow]
+    depends_on:
+      mongo: { condition: service_healthy }
+  mosquitto:
+    image: eclipse-mosquitto:2.0.22
+    restart: unless-stopped
+    ports: ["8883:8883"]
+    volumes:
+      - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./.secrets/mqtt:/mosquitto/certs:ro
+      - ./.secrets/broker:/mosquitto/data
+    networks: [lightshow]
+    healthcheck:
+      test: [CMD-SHELL, "nc -z 127.0.0.1 8883"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    <<: *app
+    command: [node, --import, tsx, apps/api/src/main.ts]
+    depends_on:
+      mongo-init: { condition: service_completed_successfully }
+      mosquitto: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+  show-engine:
+    <<: *app
+    command: [node, --import, tsx, apps/show-engine/src/main.ts]
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  ui:
+    build: { context: ., target: ui }
+    restart: unless-stopped
+    networks: [lightshow]
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      LIGHTSHOW_HOST: ${LIGHTSHOW_HOST:-lightshow.home.arpa}
+      CADDY_TLS: ${CADDY_TLS:-internal}
+    ports: ["${HTTPS_PORT:-443}:443", "${HTTP_PORT:-80}:80"]
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      lightshow:
+        aliases: ["${LIGHTSHOW_HOST:-lightshow.home.arpa}"]
+    depends_on:
+      api: { condition: service_healthy }
+      ui: { condition: service_healthy }
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1:2019/config/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  esp-simulator:
+    <<: *app
+    profiles: [simulator]
+    command: [node, --import, tsx, apps/esp-simulator/src/main.ts]
+    volumes:
+      - ./.secrets/trust:/run/trust:ro
+      - simulator-state:/state
+    ports: ["127.0.0.1:${SIM_INSPECT_PORT:-4090}:4090"]
+    # Named volume starts owned by root; simulator drops no additional privileges and stores only its own credentials.
+    user: root
+    depends_on:
+      caddy: { condition: service_healthy }
+networks:
+  lightshow:
+volumes:
+  mongo-data:
+  caddy-data:
+  caddy-config:
+  simulator-state:
