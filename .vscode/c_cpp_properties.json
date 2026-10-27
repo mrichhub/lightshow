@@ -1,0 +1,10 @@
+{
+	"configurations": [
+		{
+			"name": "ESP32",
+			"compileCommands": "${workspaceFolder}/firmware/esp32/compile_commands.json",
+			"cppStandard": "c++17"
+		}
+	],
+	"version": 4
+}

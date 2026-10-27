@@ -12,6 +12,7 @@ coverage/
 *.crt
 *.p12
 .pio/
+firmware/esp32/compile_commands.json
 .DS_Store
 .aws/
 .codex/

@@ -23,6 +23,16 @@ Firmware heartbeats report uptime, software/profile/interface, connectivity/IP/R
 
 Provision public trust, credentials and network defaults using [provisioning.md](provisioning.md). NVS contains sensitive device credentials; production installers may enable flash encryption/secure boot according to their hardware process. Do not rely on a public hardware identifier for credential replacement. LAN time is required for TLS validity checks.
 
+## Editor include paths
+
+When opening the repository root in VS Code, the checked-in C/C++ configuration reads PlatformIO's compilation database for the ESP32 compiler, include paths and board definitions. Generate it after installing PlatformIO and whenever dependencies or build flags change:
+
+```sh
+pio run -d firmware/esp32 -e wt32-eth01 -t compiledb
+```
+
+Use `-e esp32dev` instead to index the Wi-Fi build. Generate one environment at a time so the shared source has one unambiguous board configuration. The generated `compile_commands.json` contains machine-specific paths and is ignored by Git. Open `firmware/esp32/src/main.cpp` so the C/C++ extension can associate included headers such as `secrets.example.h` with that translation unit. If stale include warnings remain, run **C/C++: Reset IntelliSense Database** from the command palette.
+
 ## Physical verification
 
 Both targets are compile-tested, not electrically validated in this workspace. Before a yard installation, verify PHY power/clock and reconnection, DHCP/DNS/NTP, HTTPS and MQTT chain validation, WS2811 voltage/level conversion, common ground, wire color order, multi-output behavior, RMT/network coexistence, startup indicators, end-of-string timing, outage recovery and measured output FPS. Long strings may exceed a 25 ms budget. Start with low brightness and a short string. Never power a long LED string directly from an ESP board.
