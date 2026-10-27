@@ -667,8 +667,9 @@ void setup() {
 	xTaskCreatePinnedToCore(lightingTask, "lighting", 6144, nullptr, 3, &lightingHandle, 1);
 	xTaskCreatePinnedToCore(networkTask, "network", 8192, nullptr, 2, &networkHandle, 0);
 	// Blocking HTTPS runs in a separate worker on core 0 so UDP remains
-	// responsive.
-	xTaskCreatePinnedToCore(restTask, "rest", 16384, nullptr, 1, &restHandle, 0);
+	// responsive. TLS processing can be CPU-bound, so share the idle priority
+	// to let IDLE0 service its watchdog during consecutive TLS handshakes.
+	xTaskCreatePinnedToCore(restTask, "rest", 16384, nullptr, tskIDLE_PRIORITY, &restHandle, 0);
 }
 
 void loop() {
