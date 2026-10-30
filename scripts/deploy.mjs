@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { deploymentFiles } from "./deploy-files.mjs"
+import { deploymentFiles, sourceUploadCommand } from "./deploy-files.mjs"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const configFile = join(root, ".local/deploy.json")
@@ -108,10 +108,7 @@ try {
 	})
 
 	console.log(`Uploading ${files.length} source files to ${sshTarget}:${remoteRelease}`)
-	ssh(
-		`umask 077; mkdir -p ${quote(remoteRelease)} && tar -xzf - -C ${quote(remoteRelease)}`,
-		readFileSync(archive),
-	)
+	ssh(sourceUploadCommand(remoteRelease), readFileSync(archive))
 
 	ssh(
 		`bash ${quote(`${remoteRelease}/scripts/deploy-remote.sh`)} ${[remoteRoot, release, hostname, projectName].map(quote).join(" ")}`,

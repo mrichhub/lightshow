@@ -6,6 +6,7 @@ import {
 	mkdtempSync,
 	readFileSync,
 	rmSync,
+	statSync,
 	symlinkSync,
 	writeFileSync,
 } from "node:fs"
@@ -13,7 +14,7 @@ import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { test } from "node:test"
-import { deploymentFiles } from "../scripts/deploy-files.mjs"
+import { deploymentFiles, sourceUploadCommand } from "../scripts/deploy-files.mjs"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
@@ -24,6 +25,28 @@ function fixture(t) {
 
 	return dir
 }
+
+test("uploaded source is readable by container users while sibling secrets stay private", (t) => {
+	const dir = fixture(t)
+	const source = join(dir, "source")
+	const release = join(dir, "release's source")
+	const shared = join(dir, "shared")
+
+	mkdirSync(join(source, "scripts"), { recursive: true, mode: 0o700 })
+	mkdirSync(join(shared, ".secrets"), { recursive: true, mode: 0o700 })
+	writeFileSync(join(source, "scripts/setup.mjs"), "console.log('setup')\n", { mode: 0o600 })
+	writeFileSync(join(shared, ".env"), "private sentinel", { mode: 0o600 })
+
+	const archive = execFileSync("tar", ["-czf", "-", "scripts/setup.mjs"], { cwd: source })
+
+	execFileSync("sh", ["-c", sourceUploadCommand(release)], { input: archive })
+
+	assert.equal(statSync(join(release, "scripts")).mode & 0o777, 0o755)
+	assert.equal(statSync(join(release, "scripts/setup.mjs")).mode & 0o777, 0o644)
+	assert.equal(statSync(join(shared, ".secrets")).mode & 0o777, 0o700)
+	assert.equal(statSync(join(shared, ".env")).mode & 0o777, 0o600)
+	assert.equal(readFileSync(join(shared, ".env"), "utf8"), "private sentinel")
+})
 
 test("deployment archive excludes private files and symlinks, including tracked secrets", (t) => {
 	const dir = fixture(t)

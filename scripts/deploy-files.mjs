@@ -11,6 +11,15 @@ const rootFiles = new Set([
 	"tsconfig.json",
 ])
 
+export function sourceUploadCommand(directory) {
+	const target = "'" + directory.replaceAll("'", "'\\''") + "'"
+
+	// Archives list files, so tar creates their parent directories under the upload umask.
+	// Normalize public source before Docker COPY preserves those modes. Private state
+	// lives outside this release, and its symlinks are added only after upload.
+	return `umask 077; mkdir -p ${target} && tar -xzf - -C ${target} && chmod -R u=rwX,go=rX ${target}`
+}
+
 export function deploymentFiles(root, candidates) {
 	return [...new Set(candidates)].sort().filter((file) => {
 		const parts = file.split("/")
