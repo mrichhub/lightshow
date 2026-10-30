@@ -28,6 +28,8 @@ flowchart LR
 
 ## Start a private deployment
 
+To run the controller on a fresh Raspberry Pi 5 and update it from your Mac with `pnpm run deploy`, follow [Raspberry Pi deployment](docs/deployment.md). It includes host preparation, a fresh database, Caddy trust and moving an existing ESP to the Pi.
+
 ```sh
 corepack enable
 corepack prepare pnpm@10.20.0 --activate

@@ -1,0 +1,6 @@
+{
+	"sshTarget": "your-user@lightshow-raspberry-pi.local",
+	"directory": "lightshow",
+	"hostname": "lightshow-raspberry-pi.local",
+	"projectName": "lightshow-pi"
+}

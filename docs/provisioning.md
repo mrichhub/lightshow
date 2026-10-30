@@ -2,6 +2,8 @@
 
 ## Deployment
 
+For SSH deployment to a fresh Pi, host preparation, Caddy trust and ESP cutover, see [Raspberry Pi deployment](deployment.md). `pnpm run deploy` generates independent secrets on the Pi and preserves them during updates.
+
 Run `pnpm setup` once after installing dependencies. It generates private secrets in `.env`, `.secrets/` and `.local/`, all ignored by Git. A custom `LIGHTSHOW_HOST` is accepted before setup; use a DNS hostname. The default is `lightshow.home.arpa`. Update `.env` before startup to change host ports, target FPS or log level. `PUBLIC_ORIGIN` must exactly match the browser's HTTPS origin, including a nonstandard port if configured.
 
 Start Compose and run `pnpm trust`. Caddy owns and persists the HTTPS CA in its data volume; the export script copies only its public root. Setup generates a separate MQTT CA and leaf whose SANs include the public hostname and internal `mosquitto`. Firmware receives the combined public certificate bundle. The broker certificate's matching hostname and the HTTPS certificate's matching hostname must both validate. Do not use `curl -k`, `setInsecure()` or TLS rejection overrides.

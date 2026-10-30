@@ -10,9 +10,10 @@
 	"scripts": {
 		"build": "pnpm typecheck && pnpm --filter @lightshow/ui build",
 		"typecheck": "tsc --noEmit && pnpm --filter @lightshow/ui typecheck && tsc --noEmit -p tests/browser/tsconfig.json",
-		"test": "node --import tsx --test tests/*.test.ts",
+		"test": "node --import tsx --test tests/*.test.ts tests/*.test.mjs",
 		"test:integration": "node --import tsx --test tests/integration/*.test.ts",
 		"setup": "node scripts/setup.mjs",
+		"deploy": "node scripts/deploy.mjs",
 		"trust": "node scripts/export-trust.mjs",
 		"docker:start": "docker compose up -d --build",
 		"docker:down": "docker compose down",

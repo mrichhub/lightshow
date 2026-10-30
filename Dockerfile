@@ -18,6 +18,11 @@ RUN mkdir -p /state && chown node:node /state
 USER node
 CMD ["node", "--import", "tsx", "apps/api/src/main.ts"]
 
+FROM base AS setup
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+USER node
+
 FROM nginx:1.30.6-alpine AS ui
 COPY infra/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=base /app/apps/ui/dist /usr/share/nginx/html

@@ -2,22 +2,41 @@ import { readFileSync, writeFileSync } from "node:fs"
 
 const enrollment = process.env.FIRMWARE_PROVISIONING_TOKEN ?? ""
 
+if (process.argv.slice(2).some((arg) => arg !== "--pi") || process.argv.length > 3)
+	throw new Error("Usage: node scripts/firmware-secrets.mjs [--pi]")
+
 if (!/^[A-Za-z0-9_-]{43}$/.test(enrollment))
 	throw new Error("Set FIRMWARE_PROVISIONING_TOKEN to a hardware-bound enrollment credential")
 
-const env = Object.fromEntries(
-	readFileSync(".env", "utf8")
-		.trim()
-		.split("\n")
-		.filter((l) => !l.startsWith("#"))
-		.map((l) => {
-			const i = l.indexOf("=")
+const pi = process.argv.includes("--pi")
 
-			return [l.slice(0, i), l.slice(i + 1).replace(/^'|'$/g, "")]
-		}),
+const env = pi
+	? piEnvironment()
+	: Object.fromEntries(
+			readFileSync(".env", "utf8")
+				.trim()
+				.split("\n")
+				.filter((l) => !l.startsWith("#"))
+				.map((l) => {
+					const i = l.indexOf("=")
+
+					return [l.slice(0, i), l.slice(i + 1).replace(/^'|'$/g, "")]
+				}),
+		)
+
+function piEnvironment() {
+	const { hostname } = JSON.parse(readFileSync(".local/deploy.json", "utf8"))
+
+	if (typeof hostname !== "string" || !/^[a-z0-9.-]+$/.test(hostname))
+		throw new Error("Invalid Pi hostname in .local/deploy.json")
+
+	return { PUBLIC_ORIGIN: `https://${hostname}`, LIGHTSHOW_HOST: hostname }
+}
+
+const ca = readFileSync(
+	pi ? ".local/pi/trust/device-ca-bundle.crt" : ".secrets/trust/device-ca-bundle.crt",
+	"utf8",
 )
-
-const ca = readFileSync(".secrets/trust/device-ca-bundle.crt", "utf8")
 
 const define = (key, value) => `#define ${key} ${JSON.stringify(value)}\n`
 
