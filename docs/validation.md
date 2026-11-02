@@ -6,6 +6,8 @@ Recorded on 2026-10-27: one original ESP32 Wi-Fi development board was physicall
 
 Automated checks are deliberately separated from physical hardware acceptance.
 
+GitHub Actions sets `COMPOSE_FILE=docker-compose.yml:docker-compose.ci.yml` for the application job. The CI override enables glibc rseq registration (`GLIBC_TUNABLES=glibc.pthread.rseq=1`) so MongoDB uses TCMalloc's per-thread caches. This avoids the [TCMalloc/kernel incompatibility](https://jira.mongodb.org/browse/SERVER-121912) that prevents MongoDB 8.0.34 from starting on some hosted runner kernels. CI verifies that `serverStatus().tcmalloc.usingPerCPUCaches` is `false` before running integration checks. Normal deployments retain the MongoDB image's allocator settings. To reproduce the CI configuration locally, export the same `COMPOSE_FILE` before starting Compose, exporting trust and running integration checks.
+
 `pnpm test` covers six-character ID generation and collision retries, token entropy/hashing, board pin restrictions, duplicate pins, cross-device mappings, skipped logical indexes, overlap rejection, freshness/health classification, DDP headers/offsets/sequence rollover, multi-packet completion, dropped/incomplete recovery, allowlists, source lock, five-second timeout, local exemption, all six effects and scene/debugger composition.
 
 `pnpm test:firmware` compiles and runs the actual portable firmware DDP parser with a host C++ compiler, covering malformed lengths, source filtering/lock, ordered completion, wrap and timeout. `pio run -d firmware/esp32 -e wt32-eth01 -e esp32dev` compiles both complete embedded applications and reports RAM/flash size.

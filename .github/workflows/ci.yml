@@ -3,6 +3,8 @@ on: [push, pull_request]
 jobs:
   application:
     runs-on: ubuntu-latest
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -14,6 +16,15 @@ jobs:
         run: pnpm run setup
       - name: Start integration services and export public trust
         run: docker compose up -d --build --wait && pnpm trust
+      - name: Verify MongoDB allocator fallback
+        run: |
+          docker compose exec -T mongo bash -c '
+            exec mongosh --quiet \
+              --username "$MONGO_INITDB_ROOT_USERNAME" \
+              --password "$MONGO_INITDB_ROOT_PASSWORD" \
+              --authenticationDatabase admin \
+              --eval "db.serverStatus().tcmalloc.usingPerCPUCaches === false || quit(1)"
+          '
       - run: bash scripts/integration.sh
       - if: always()
         run: docker compose logs --tail 100 && docker compose down

@@ -1,0 +1,7 @@
+# GitHub runners can use kernels rejected by MongoDB's TCMalloc per-CPU cache check.
+# Let glibc register rseq so TCMalloc falls back to per-thread caches in CI only.
+# https://jira.mongodb.org/browse/SERVER-121912
+services:
+  mongo:
+    environment:
+      GLIBC_TUNABLES: glibc.pthread.rseq=1
