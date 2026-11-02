@@ -10,7 +10,10 @@ jobs:
       - run: npm install -g pnpm@10.20.0
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check && pnpm typecheck && pnpm test && pnpm test:firmware && pnpm build
-      - run: pnpm setup && docker compose up -d --build --wait && pnpm trust
+      - name: Generate private deployment configuration
+        run: pnpm run setup
+      - name: Start integration services and export public trust
+        run: docker compose up -d --build --wait && pnpm trust
       - run: bash scripts/integration.sh
       - if: always()
         run: docker compose logs --tail 100 && docker compose down

@@ -34,12 +34,12 @@ To run the controller on a fresh Raspberry Pi 5 and update it from your Mac with
 corepack enable
 corepack prepare pnpm@10.20.0 --activate
 pnpm install --frozen-lockfile
-pnpm setup
+pnpm run setup
 docker compose up -d --build
 pnpm trust
 ```
 
-`pnpm setup` creates an ignored `.env`, random deployment credentials, MongoDB replication key, MQTT CA/server certificate and broker authorization file. The administrator password is stored locally in `.local/admin-password`; the `.env` contains its Argon2id hash. Set `LIGHTSHOW_SETUP_PASSWORD` before setup if you want to choose the password. Setup refuses to overwrite existing private configuration.
+`pnpm run setup` creates an ignored `.env`, random deployment credentials, MongoDB replication key, MQTT CA/server certificate and broker authorization file. Use the explicit `run`: `pnpm setup` invokes pnpm's own shell setup command. The administrator password is stored locally in `.local/admin-password`; the `.env` contains its Argon2id hash. Set `LIGHTSHOW_SETUP_PASSWORD` before setup if you want to choose the password. Setup refuses to overwrite existing private configuration.
 
 Trust **only the public certificate** `.secrets/trust/https-ca.crt` in your browser/OS, then visit **https://lightshow.home.arpa**. For macOS, import it into Keychain Access and explicitly trust it for SSL; on Raspberry Pi OS, install it under `/usr/local/share/ca-certificates/` and run `sudo update-ca-certificates`. Never distribute `.secrets/mqtt/ca.key` or Caddy's private CA data. The HTTPS root is created and persisted by Caddy's `tls internal`; MQTT uses a separate deployment CA. `pnpm trust` exports a combined public bundle for firmware.
 
